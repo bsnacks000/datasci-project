@@ -1,14 +1,16 @@
-# Cookiecutter Data Science
+# Data Science Project 
 
-_A logical, reasonably standardized, but flexible project structure for doing and sharing data science work._
 
-This is a fork of http://drivendata.github.io/cookiecutter-data-science/ with some tweaks and modifications. 
+This is based on a fork of http://drivendata.github.io/cookiecutter-data-science/ with some tweaks and modifications. 
 
 * A build system that generates reports from jupyter notebooks using pre-commit hooks.  
-* Dropbox sync of raw data and models using Oauth instead of AWS. 
+* Dropbox sync of raw data and models using Oauth. 
 * A data pipeline that supports multiple caching layers. 
-* A data cleaning API that can be used to register and develop pre-preprocessing pipelines
+* A customizable data cleaning and modeling API that supports reproducability and uni-directional data flow.
 * README and documentation focused on outlining research methodology
+
+
+Read GUIDELINES.md for more details.
 
 ### Requirements to use the cookiecutter template:
 -----------
@@ -30,21 +32,10 @@ $ conda install cookiecutter
 ### To start a new project, run:
 ------------
 
-    cookiecutter https://github.com/bsnacks000/cookiecutter-data-science
+    cookiecutter https://github.com/bsnacks000/datasci-project
 
 
 ### The resulting directory structure
 ------------
 
 The resulting directory structure can be found in the repo GUIDELINES.md
-
-
-### Installing development requirements
-------------
-
-    pip install -r requirements.txt
-
-### Running the tests
-------------
-
-    py.test tests
