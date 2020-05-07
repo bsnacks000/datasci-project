@@ -54,11 +54,14 @@ class DropboxAPI(object):
         return self._dbx
 
 
-    def flush_folder(self, subfolder, remove=False):
+    def flush_folder(self, subfolder):
         """ delete all contents of a project subfolder
         """
+        dbx_path, _ = self._syncable_local_subfolders.get(subfolder) 
+
         entries = []
-        for entry in self._dbx.files_list_folder(subfolder).entries:
+        for entry in self._dbx.files_list_folder(dbx_path).entries:
+            print(f'deleting from {dbx_path}...  {entry.path_lower}')
             e = self._dbx.files_delete(entry.path_lower)
             entries.append(e)
         return entries
@@ -117,3 +120,17 @@ def push_to_dropbox(project_name):
     client.upload_data('root')
     client.upload_data('raw') 
     client.upload_data('models')
+
+
+
+@click.command()
+@click.option('-n', '--project-name', type=click.STRING, default=None, help='Flush the data folders on dropbox')
+def flush_dropbox(project_name):
+    message = 'This will delete the contents of the project data folders on dropbox! Your local raw files will remain intact... Continue?'
+    if click.confirm(message, abort=True):
+        if click.confirm('Really delete the things???', abort=True):
+            client = DropboxAPI(project_name)
+            client.login()
+            client.flush_folder('raw')
+            client.flush_folder('models')
+

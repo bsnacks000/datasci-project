@@ -61,7 +61,8 @@ setup(
             'push-to-dropbox=_{{cookiecutter.package_name}}_build_system.dropbox_api:push_to_dropbox',
             'pull-from-dropbox=_{{cookiecutter.package_name}}_build_system.dropbox_api:pull_from_dropbox', 
             'build-entrypoint=_{{cookiecutter.package_name}}_build_system.data:build_entrypoint', 
-            'build-models=_{{cookiecutter.package_name}}_build_system.data:build_models'
+            'build-models=_{{cookiecutter.package_name}}_build_system.data:build_models', 
+            'flush-dropbox=_{{cookiecutter.package_name}}_build_system.dropbox_api:flush_dropbox'
             # 'initialize-dropbox-project=_{{cookiecutter.package_name}}_build_system.dropbox_api:initialize_dropbox_project'
         ]
     }, 

@@ -46,7 +46,11 @@ push-to-dropbox: ## push data to dropbox via API
 
 pull-from-dropbox:  ## pull data from dropbox via API
 	pull-from-dropbox -n ${PROJECT_NAME}
-	#build-entrypoint
+
+
+flush-dropbox:	## flush raw data from dropbox via API 
+	flush-dropbox -n ${PROJECT_NAME}
+
 
 entrypoint:  ## load the entrypoint data
 	build-entrypoint
