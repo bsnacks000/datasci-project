@@ -4,6 +4,7 @@ from .config import RAW_DATA_DIR, ENTRYPOINT_DATA_DIR,\
     CACHE_DIR, MODELS_DIR
 import pathlib
 from flask_caching import Cache
+from . import pathutils
 
 import sys
 import collections
@@ -38,6 +39,7 @@ class JsonParser(Parser):
         return data 
 
     def write(self, filepath, data):
+        pathutils.touch_filepath(filepath)
         with open(filepath, 'w') as f:
             json.dump(data, f)
 
@@ -48,6 +50,7 @@ class PandasCSVParser(Parser):
         return pd.read_csv(filepath)
     
     def write(self, filepath, data):
+        pathutils.touch_filepath(filepath)
         if not isinstance(data, pd.DataFrame):
             data = pd.DataFrame.from_records(data)
         data.to_csv(filepath, index=False)
@@ -59,7 +62,8 @@ class PickleParser(Parser):
         return pickle.load(open(filepath, 'rb'))
 
     def write(self, filepath, data):
-            pickle.dump(data, open(filepath, 'wb'))
+        pathutils.touch_filepath(filepath)
+        pickle.dump(data, open(filepath, 'wb'))
 
 
 class SklearnPklParser(Parser):
@@ -68,8 +72,9 @@ class SklearnPklParser(Parser):
         return joblib.load(open(filepath, 'rb'))
 
     def write(self, filepath, model):
+        pathutils.touch_filepath(filepath)
         joblib.dump(model, open(filepath, 'wb'))
-        print(filepath)
+        # print(filepath)
         # NOTE this metadata will only really work with sklearn built ins
         # other parsers need to be implemented for other libraries. 
         # This API should be extended and these classes globally registered...
@@ -100,17 +105,6 @@ class _DataManager(object):
         self._models_folder = models_folder or MODELS_DIR 
 
 
-    # def _reset_folder(self, folder):
-    #     """ flushes a local folder. This is used internally to build the entrypoint
-    #     and models.
-    #     This makes the data cleaning operation atomic (DELETE/CREATE)
-    #     """
-    #     shutil.rmtree(folder)
-    #     os.makedirs(folder)
-    #     gk = pathlib.Path(folder ) / '.gitkeep'
-    #     gk.touch()
-
-
     def _load_data(self, filenames, folder):
         """ loads the input data in filename order
         """
@@ -126,7 +120,6 @@ class _DataManager(object):
         """ writes the cleaned data in filename order
         """
         for i, f in enumerate(filenames):
-            print(f)
             parser = self.get_parser(f)
             parser.write(folder / f, data[i])
 
@@ -181,22 +174,21 @@ class _DataManager(object):
     
 
     def available_entrypoints(self):
-        """ Return a shallow copy of the current available entrypoint filenames
+        """ Return a list of posix paths from the entrypoint folder.
         """
-        return [f for f in os.listdir(self._entrypoint_folder) 
-            if f not in ('.gitkeep', '.gitignore')]
+        return pathutils.build_subpaths(self._entrypoint_folder, accept=['*.csv', '*.json', '.data.pkl'])
         
     
     def available_models(self):
-        """ Return a shallow copy of the current available model filenames
+        """ Return a list of posix paths from the models folder
         """
-        return [f for f in os.listdir(self._models_folder) 
-            if f not in ('.gitkeep', '.gitignore')]
+        return pathutils.build_subpaths(self._models_folder, accept=['*.csv', '*.json', '.data.pkl', '.model.pkl'])
         
 
     def available_raw_data(self):
-        return [f for f in os.listdir(self._raw_folder) 
-            if f not in ('.gitkeep', '.gitignore')]
+        """ Return a list of posix paths from the raw folder
+        """
+        return pathutils.build_subpaths(self._raw_folder, accept=['*.csv', '*.json'])
     
 
     def get_parser(self, filename):
@@ -282,12 +274,12 @@ class _DataManager(object):
             return
 
         try:
-            for raw_name in raw_list:  # validate extensions
-                assert raw_name.endswith('.json')\
-                    or raw_name.endswith('.csv')\
-                    or raw_name.endswith('.data.pkl'), f'Invalid file extension: {raw_name}'
+            raw_fnames = []
+            for p in raw_list: 
+                _, after = pathutils.path_splitter(str(p), after='raw')
+                raw_fnames.append(after)
             
-            raw_set = set(raw_list)  # all the raw files
+            raw_set = set(raw_fnames)  # all the raw files
             s = set()  # all the raw files being processed
             for func, fnames in self._processor_registry.items():
                 raw, _ = fnames 
@@ -295,6 +287,7 @@ class _DataManager(object):
                     s.add(r)
 
             diff = list(raw_set - s)  # diff are the raw files that aren't being cleaned... we can transfer these
+            print('Raw files not being cleaned: ', diff)
             for d in diff:
                 d_src_path = self._raw_folder / d  
                 d_dest_path = self._entrypoint_folder / d
@@ -347,18 +340,14 @@ def fetch_data(filename, folder_name='entrypoint'):
     from {{cookiecutter.package_name}}.registry import data_manager # lazy import singleton to avoid module issues
 
     if folder_name == 'entrypoint':
-        assert filename in data_manager.available_entrypoints(), "Given filename is not in avaialble entrypoints."
-        filename = ENTRYPOINT_DATA_DIR / filename
-
+        fpath = data_manager._entrypoint_folder / filename 
     elif folder_name == 'models':
-        assert filename in data_manager.available_models(), 'Given filename is not available in models.'
-        filename = MODELS_DIR / filename 
-
+        fpath = data_manager._models_folder / filename
     else:
-        raise TypeError('You can only fetch data from entrypoint or models')
+        raise TypeError('Can only read from entrypoint or models folders')
 
     parser = data_manager.get_parser(filename)
-    return parser.read(filename)
+    return parser.read(fpath)
 
 
 def create_cache():

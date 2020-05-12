@@ -67,36 +67,44 @@ class DropboxAPI(object):
         return entries
 
 
-    def upload_data(self, subfolder):
-        """ Uploads any data from the subfolder into the dropbox Apps/project/subfolder. 
+    def upload_data(self, excludes=['.localcache', 'entrypoint']):
+        """ Uploads any data from root of the data folder into the dropbox Apps/project/directory. Will exclude 
+        any directories given to upload_data. 
         """
-        dbx_path, local_path = self._syncable_local_subfolders.get(subfolder) # get the paths
-        # print(dbx_path, local_path)
+        _, local_path = self._syncable_local_subfolders.get('root') # get the rootpath
         responses = []
-        filenames = [f for f in os.listdir(str(local_path))]
-        print(filenames)
-        for file_name in filenames: 
-            f = local_path / file_name 
-            if not os.path.isdir(f):
-                dbx_file_path = dbx_path + '/' + file_name  
-                print(f, dbx_file_path)
-                with open(f, 'rb') as f:
-                    res = self._dbx.files_upload(f.read(), dbx_file_path)
+        for dn, dirs, files in os.walk(local_path):
+            dirs[:] = [d for d in dirs if d not in excludes]
+            for f in files:
+                local_path = dn + '/' + f 
+                dbx_path = '/' + local_path 
+                print('uploading... ', dbx_path)
+                with open(local_path, 'rb') as f:
+                    res = self._dbx.files_upload(f.read(), dbx_path)
                     responses.append(res)
         return responses
 
 
-    def download_data(self, subfolder):
-        """ Downloads data from the subfolYder into the local data/subfolder. 
+    def download_data(self):
+        """ Downloads all data from the dropbox project root into the local data folder.  
         """
-        dbx_path, local_path = self._syncable_local_subfolders.get(subfolder) # get the paths
+
+        dbx_path, local_path = self._syncable_local_subfolders.get('root') # get the paths
         responses = []
-        for entry in self._dbx.files_list_folder(dbx_path).entries:
-            if isinstance(entry, FileMetadata):
-                print(entry)
-                md = self._dbx.files_download_to_file(str(local_path) + '/' + str(entry.name), entry.path_lower)
+        
+        for entry in dbx.files_list_folder(dbx_path, recursive=True).entries:
+            if isinstance(entry, dropbox.files.FolderMetadata):
+                p = local_path / entry.path_lower.replace('/' + self._project_name, '')[1:]
+                print('creating folder: ', p)
+                pathlib.Path(p).mkdir(parents=True, exist_ok=True)
+        
+            elif isinstance(entry, dropbox.files.FileMetadata):
+                p = local_path / entry.path_lower.replace('/' + self._project_name, '')[1:]
+                print('downloading file: ', p)
+                md = dbx.files_download_to_file(p, entry.path_lower)
                 responses.append((md, f'bytes downloaded: {md.size}'))
-        return responses
+
+        return responses 
 
 
 @click.command() 
@@ -105,10 +113,7 @@ class DropboxAPI(object):
 def pull_from_dropbox(project_name):
     client = DropboxAPI(project_name)
     client.login() 
-    client.download_data('root')
-    client.download_data('raw') 
-    client.download_data('models')
-
+    client.download_data()
 
 
 @click.command() 
@@ -117,10 +122,7 @@ def pull_from_dropbox(project_name):
 def push_to_dropbox(project_name):
     client = DropboxAPI(project_name)
     client.login()
-    client.upload_data('root')
-    client.upload_data('raw') 
-    client.upload_data('models')
-
+    client.upload_data()
 
 
 @click.command()
