@@ -19,13 +19,14 @@ def persist_notebooks():
 
     for f in filepaths:
         if ' ' in f:
-            print(f"""Spaces found in report filepath {} which nbconvert cannot handle.\n 
+            print(f"""Spaces found in report filepath {f} which nbconvert cannot handle.\n 
                 Remove spaces from the filename to process or process manually.""")
             continue 
-
-        print(f'Converting the following notebooks: {f}')
-        cmd = f'jupyter nbconvert {f} --to=html --execute --log-level=INFO --output-dir={REPORTS_DIR}'
-        subprocess.run(cmd, shell=True, check=True)
+    
+        else:
+            print(f'Converting the following notebooks: {f}')
+            cmd = f'jupyter nbconvert {f} --to=html --execute --log-level=INFO --output-dir={REPORTS_DIR}'
+            subprocess.run(cmd, shell=True, check=True)
 
 
 
