@@ -71,15 +71,16 @@ class DropboxAPI(object):
         """ Uploads any data from root of the data folder into the dropbox Apps/project/directory. Will exclude 
         any directories given to upload_data. 
         """
-        _, local_path = self._syncable_local_subfolders.get('root') # get the rootpath
+        dbx_root, local_path = self._syncable_local_subfolders.get('root') # get the rootpath
+        # print(local_path)
         responses = []
         for dn, dirs, files in os.walk(local_path):
             dirs[:] = [d for d in dirs if d not in excludes]
             for f in files:
-                local_path = dn + '/' + f 
-                dbx_path = '/' + local_path 
-                print('uploading... ', dbx_path)
-                with open(local_path, 'rb') as f:
+                fpath = dn + '/' + f 
+                dbx_path = fpath.replace(str(local_path), dbx_root)
+                print('uploading...', fpath, ' to ', dbx_path)
+                with open(fpath, 'rb') as f:
                     res = self._dbx.files_upload(f.read(), dbx_path)
                     responses.append(res)
         return responses
