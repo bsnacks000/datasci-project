@@ -44,7 +44,10 @@ The directory structure of your new project looks like this:
 ├── {{cookiecutter.package_name}}       <- User defined code for this project. 
 │   ├── __init__.py                     <- Contains public imports from _build_system package that can be used
 │   ├── _version.py                     <- package version data (bump this and git tag to create dev cycles)
-│           ...                         <- Any developed python code for maintaining reproducibilty using APIs in build system
+|   ├── _build                          <- a private package that contains the build system tooling
+│       └── __init__.py 
+|       └── ...
+|     ...                         <- Any developed python code for maintaining reproducibilty using APIs in build system
 │
 │
 └── HISTORY.md            <- for tracking changes to the project package
@@ -242,7 +245,7 @@ Here are the basic rules to follow so that this setup might hopefully help you b
 * Entrypoint data can be derived from the raw data using the ``data_manager`` API. Think of this as production level pre-processing that helps assure reproducibility. It is the actual data used for the project and should evolve dynamically alongside the work. 
 * Models are ultimately derived from the entrypoint data using the ``data_manager`` API. This should be the final step in making production models for use in reports or the greater world. 
 * If you need to write data from within the ``notebooks/`` or project package use the ``localcache``. Do not ever write to the ``data/`` folder directly.  
-* Always use the ``Makefile`` to sync project data upstream and build your local ``data/`` folder. Treat the _{{cookiecutter.package_name}}_build_system package as private.
+* Always use the ``Makefile`` to sync project data upstream and build your local ``data/`` folder. Treat the _{{cookiecutter.package_name}}._build package as private.
 * Never directly consume an outside data stream within the project. All data streams should be collected stored as ``json`` or ``csv`` in the raw data folder.
 * If you feel the need to keep your data collection work with the project use the ``scripts/`` folder. These should be completely independent of any project code.  
 * Do not copy and paste code between notebooks. Thats what project packages are for... if you find yourself reusing the same piece of code create a module level function or class-based API within the project package and import the functionality into your notebooks.

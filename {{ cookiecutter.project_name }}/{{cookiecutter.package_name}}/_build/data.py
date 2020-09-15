@@ -382,7 +382,7 @@ def build_entrypoint():
     running any registered cleaning methods on the raw data folder. 
     """
     try:
-        from {{cookiecutter.package_name}}.registry import data_manager     
+        from ..registry import data_manager     
     except ImportError as err:
         print(str(err))
         print('Could not import data_manager from {{cookiecutter.package_name}}.registry.')
@@ -397,7 +397,7 @@ def build_models():
     any registered modeling methods on the entrypoint data.
     """
     try:
-        from {{cookiecutter.package_name}}.registry import data_manager     
+        from ..registry import data_manager     
     except ImportError as err:
         print(str(err))
         print('Could not import data_manager from {{cookiecutter.package_name}}.registry.')

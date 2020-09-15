@@ -57,12 +57,12 @@ setup(
     tests_require=test_requirements,
     entry_points={
         'console_scripts': [
-            'persist-notebooks=_{{cookiecutter.package_name}}_build_system.reports:persist_notebooks', 
-            'push-to-dropbox=_{{cookiecutter.package_name}}_build_system.dropbox_api:push_to_dropbox',
-            'pull-from-dropbox=_{{cookiecutter.package_name}}_build_system.dropbox_api:pull_from_dropbox', 
-            'build-entrypoint=_{{cookiecutter.package_name}}_build_system.data:build_entrypoint', 
-            'build-models=_{{cookiecutter.package_name}}_build_system.data:build_models', 
-            'flush-dropbox=_{{cookiecutter.package_name}}_build_system.dropbox_api:flush_dropbox'
+            'persist-notebooks={{cookiecutter.package_name}}._build.reports:persist_notebooks', 
+            'push-to-dropbox={{cookiecutter.package_name}}._build.dropbox_api:push_to_dropbox',
+            'pull-from-dropbox={{cookiecutter.package_name}}._build.dropbox_api:pull_from_dropbox', 
+            'build-entrypoint={{cookiecutter.package_name}}._build.data:build_entrypoint', 
+            'build-models={{cookiecutter.package_name}}._build.data:build_models', 
+            'flush-dropbox={{cookiecutter.package_name}}._build.dropbox_api:flush_dropbox'
             # 'initialize-dropbox-project=_{{cookiecutter.package_name}}_build_system.dropbox_api:initialize_dropbox_project'
         ]
     }, 

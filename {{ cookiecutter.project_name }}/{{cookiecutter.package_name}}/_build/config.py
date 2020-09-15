@@ -5,7 +5,7 @@ import dotenv
 PROJECT_NAME = '{{cookiecutter.package_name}}' ## XXX will be configured by cookiecutter
 
 # global paths for the project directory...
-ROOT_DIR = pathlib.Path(os.path.dirname(os.path.dirname(__file__)))
+ROOT_DIR = pathlib.Path(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 DATA_DIR = ROOT_DIR / 'data'
 RAW_DATA_DIR = DATA_DIR / 'raw'
 ENTRYPOINT_DATA_DIR = DATA_DIR / 'entrypoint'

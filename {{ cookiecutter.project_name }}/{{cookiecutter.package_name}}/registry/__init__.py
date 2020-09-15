@@ -2,7 +2,7 @@
 """
 # DO NOT MODIFY THIS MODULE!
 
-from _{{cookiecutter.package_name}}_build_system.data import create_data_manager,\
+from _build.data import create_data_manager,\
     create_cache, fetch_data
 
 data_manager = create_data_manager()
