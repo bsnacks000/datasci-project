@@ -136,7 +136,7 @@ Data science is a chaotic (or creative depending on your stance) endeavor. But d
 
 Our data flows from ``raw/`` to ``entrypoint/`` to ``models/`` via a registry API that hooks directly into the Makefile commands, with ``.localcache`` used more flexibly throughout for optimization and convenience via memoization and/or explicit caching. 
 
-**NOTE** _using this API is entirely optional. You can still follow the principles for uni-directional data flow while writing to the data folders yourself if the scope of your project is beyond what this API provides. However for small to medium size projects the API will take care of making your data pipeline more consistent. If a custom data processing chain is needed it should be written within the project package and called from scripts, never from notebooks._ 
+**NOTE** _using this API is entirely optional. You can still follow the principles for uni-directional data flow while writing to the data folders yourself if the scope of your project is beyond what this API provides. However for small to medium size projects the API will take care of making your data pipeline more consistent. If a custom data processing chain is needed for larger projects it should be implemented within the project package and called from scripts, never from notebooks._ 
 
 Here's an overview of how this works. Say we load three raw data streams into the ``raw/`` folder and we want to do some processing on two of them in order to create a new dataset in ``entrypoint/`` before we model. The third we want to use directly because its already clean or maybe we're using some weird ensemble learning stack and need it go into our pipeline seperately. 
 ```python
