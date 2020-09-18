@@ -318,6 +318,7 @@ class _DataManager(object):
 
         try:
             for entry_name in entrypoint_list:  # validate extensions
+                entry_name = str(entry_name)
                 assert entry_name.endswith('.json') \
                     or entry_name.endswith('.csv') \
                     or entry_name.endswith('data.pkl'), f'Invalid file extension: {entry_name}'
@@ -382,13 +383,13 @@ def build_entrypoint():
     running any registered cleaning methods on the raw data folder. 
     """
     try:
-        from ..registry import data_manager     
+        from .. import registry   
     except ImportError as err:
         print(str(err))
         print('Could not import data_manager from {{cookiecutter.package_name}}.registry.')
         sys.exit(1)
     
-    data_manager.update_entrypoint()
+    registry.data_manager.update_entrypoint()
 
 
 @click.command()
@@ -397,10 +398,10 @@ def build_models():
     any registered modeling methods on the entrypoint data.
     """
     try:
-        from ..registry import data_manager     
+        from .. import registry      
     except ImportError as err:
         print(str(err))
         print('Could not import data_manager from {{cookiecutter.package_name}}.registry.')
         sys.exit(1)
     
-    data_manager.update_models()
+    registry.data_manager.update_models()
