@@ -134,7 +134,9 @@ Data science is a chaotic (or creative depending on your stance) endeavor. But d
 │   ├── raw/                
 ```
 
-Our data flows from ``raw/`` to ``entrypoint/`` to ``models/`` via a registry API that hooks directly into the Makefile commands, with ``.localcache`` used more flexibly throughout for optimization and convenience via memoization and/or explicit caching.
+Our data flows from ``raw/`` to ``entrypoint/`` to ``models/`` via a registry API that hooks directly into the Makefile commands, with ``.localcache`` used more flexibly throughout for optimization and convenience via memoization and/or explicit caching. 
+
+**NOTE** _using this API is entirely optional. You can still follow the principles for uni-directional data flow while writing to the data folders yourself if the scope of your project is beyond what this API provides. However for small to medium size projects the API will take care of making your data pipeline more consistent. If a custom data processing chain is needed it should be written within the project package and called from scripts, never from notebooks._ 
 
 Here's an overview of how this works. Say we load three raw data streams into the ``raw/`` folder and we want to do some processing on two of them in order to create a new dataset in ``entrypoint/`` before we model. The third we want to use directly because its already clean or maybe we're using some weird ensemble learning stack and need it go into our pipeline seperately. 
 ```python
@@ -225,7 +227,7 @@ Other notebooks are considered "development" in that they will be version-contro
 
 Please, please please... __DO NOT COPY PASTE CODE__ between notebooks. That is what the project package is for. Any functions or classes that handle visualization or an intermediate part of the pipeline can and should be implemented within the package. I would argue that almost _all_ code should eventually make its way into modules and loaded into the notebooks. It makes the project even more transparent and extremely easy to unittest. At the very least, long notebook scripts should be broken down into sets of static functions, heavily documented and placed in the top cell away from the "script" that is being run.  
 
-A final key agreement, possibly the most important, that needs to be mentioned is the read-only nature of the ``data/`` folder when used in conjunction with notebooks. Like working in the project package above, under no circumstances should the user write directly to any parts of the ``data/`` folder. It should be treated as __READ-ONLY__. We provide two special functions that can be imported from ``{{cookiecutter.package_name}}.registry`` to fetch data from both the ``entrypoint`` and the ``models`` subfolders. Only the build-system is allowed to write to these folders via the decorator API mentioned above. 
+A final key agreement, possibly the most important, that needs to be mentioned is the read-only nature of the ``data/`` folder when used in conjunction with notebooks. Like working in the project package above, under no circumstances should the user write directly to any parts of the ``data/`` folder from the notebooks. It should be treated as __READ-ONLY__. We provide two special functions that can be imported from ``{{cookiecutter.package_name}}.registry`` to fetch data from both the ``entrypoint`` and the ``models`` subfolders. The user should use the registry API outlined above or create a similar API in the project package and scripts folders to create the neccesary tooling.
 
 The user can however freely write to the ``localcache`` object provided in ``{{cookiecutter.package_name}}.registry`` anywhere in the project package or notebooks. This is mainly for the purposes of optimization and memoization. In some cases it may be used to create ad-hoc datastores. It is simply a [flask-caching](https://flask-caching.readthedocs.io/en/latest/) object configured to use the file system with reasonable defaults.  
 
@@ -244,7 +246,7 @@ Here are the basic rules to follow so that this setup might hopefully help you b
 * Raw data streams are immutable. Do not delete anything in there that you commit nor alter the schema or data itself. 
 * Entrypoint data can be derived from the raw data using the ``data_manager`` API. Think of this as production level pre-processing that helps assure reproducibility. It is the actual data used for the project and should evolve dynamically alongside the work. 
 * Models are ultimately derived from the entrypoint data using the ``data_manager`` API. This should be the final step in making production models for use in reports or the greater world. 
-* If you need to write data from within the ``notebooks/`` or project package use the ``localcache``. Do not ever write to the ``data/`` folder directly.  
+* If you need to write data from within the ``notebooks/`` or project package use the ``localcache``. Try not to ever write to the data folder directly unless absolutely neccessary.  
 * Always use the ``Makefile`` to sync project data upstream and build your local ``data/`` folder. Treat the _{{cookiecutter.package_name}}._build package as private.
 * Never directly consume an outside data stream within the project. All data streams should be collected stored as ``json`` or ``csv`` in the raw data folder.
 * If you feel the need to keep your data collection work with the project use the ``scripts/`` folder. These should be completely independent of any project code.  
