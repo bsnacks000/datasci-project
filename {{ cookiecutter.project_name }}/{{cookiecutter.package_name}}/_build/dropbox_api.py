@@ -7,7 +7,7 @@ from .config import DROPBOX_ACCESS_TOKEN, PROJECT_NAME,\
 
 import click 
 import os 
-
+import pathlib
 import logging 
 import sys
 l = logging.getLogger(__name__)
@@ -93,7 +93,7 @@ class DropboxAPI(object):
         dbx_path, local_path = self._syncable_local_subfolders.get('root') # get the paths
         responses = []
         
-        for entry in dbx.files_list_folder(dbx_path, recursive=True).entries:
+        for entry in self._dbx.files_list_folder(dbx_path, recursive=True).entries:
             if isinstance(entry, dropbox.files.FolderMetadata):
                 p = local_path / entry.path_lower.replace('/' + self._project_name, '')[1:]
                 print('creating folder: ', p)
@@ -102,7 +102,7 @@ class DropboxAPI(object):
             elif isinstance(entry, dropbox.files.FileMetadata):
                 p = local_path / entry.path_lower.replace('/' + self._project_name, '')[1:]
                 print('downloading file: ', p)
-                md = dbx.files_download_to_file(p, entry.path_lower)
+                md = self._dbx.files_download_to_file(p, entry.path_lower)
                 responses.append((md, f'bytes downloaded: {md.size}'))
 
         return responses 
